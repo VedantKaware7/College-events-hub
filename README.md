@@ -34,7 +34,7 @@ Colleges announce events through posters, WhatsApp groups and Google Forms. Stud
 | Backend | Node.js 20, Express 4, Mongoose 8, JWT, bcryptjs |
 | Database | MongoDB Atlas (cloud), MongoDB 7 container (local) |
 | Hosting | Render: Docker web service (API) + static site on a CDN (frontend) |
-| DevOps | Docker, Docker Compose, nginx, GitHub Actions, GitHub Container Registry, Render Blueprint (IaC), UptimeRobot |
+| DevOps | Docker, Docker Compose, nginx, GitHub Actions, GitHub Container Registry, Render Blueprint (IaC) |
 
 ## Architecture
 

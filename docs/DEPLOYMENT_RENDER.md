@@ -1,6 +1,6 @@
 # Deploying College-Events-hub to Render
 
-**Stack:** Render (Docker web service + static site) · MongoDB Atlas · Brevo email API · GitHub Actions · GitHub Container Registry · UptimeRobot.
+**Stack:** Render (Docker web service + static site) · MongoDB Atlas · Brevo email API · GitHub Actions · GitHub Container Registry.
 **Cost:** ₹0. No credit card is needed for any of these services.
 
 ```
@@ -25,7 +25,6 @@ The infrastructure is defined in [`render.yaml`](../render.yaml) (Render Bluepri
 | Render | https://render.com → **Sign in with GitHub** | Hosting |
 | MongoDB Atlas | https://cloud.mongodb.com | Database |
 | Brevo | https://www.brevo.com | OTP emails (Render's free tier blocks SMTP, so Gmail won't work there) |
-| UptimeRobot | https://uptimerobot.com | Uptime monitoring |
 
 ## 2. MongoDB Atlas
 
@@ -156,16 +155,7 @@ Watch **Actions → Deploy to Render**:
 
 Open the frontend URL. Your change is live.
 
-## 10. Monitoring (UptimeRobot)
-
-1. **New monitor** → type **HTTP(s) – Keyword**.
-2. URL: `https://<api-url>/api/health`, keyword `"status":"ok"`, interval **5 minutes**.
-3. Add a second monitor for the frontend URL (type HTTP(s)).
-4. **Status pages → Create** → add both monitors → share the public status page link in your report.
-
-The health monitor also keeps the free API from sleeping. Render's 750 free hours per month cover one service running continuously.
-
-## 11. Useful Render features for the demo
+## 10. Useful Render features for the demo
 
 | Where | What to show |
 |---|---|
@@ -177,7 +167,7 @@ The health monitor also keeps the free API from sleeping. Render's 750 free hour
 | Blueprint page | All infrastructure synced from `render.yaml` |
 | Any past deploy → **Rollback** | One-click rollback to a previous version |
 
-## 12. Run the production images locally (optional)
+## 11. Run the production images locally (optional)
 
 ```bash
 GHCR_OWNER=<your-github-username-lowercase> IMAGE_TAG=latest \
@@ -194,6 +184,6 @@ GHCR packages are private by default. Run `docker login ghcr.io` first, or set t
 | Deploy hook returns `404` | Render hasn't fetched that commit yet, or the hook URL is wrong. Re-run the job |
 | "did not report version … within 15 minutes" | Open Render → API service → **Logs**. Usually `MONGO_URI` is wrong or Atlas Network Access doesn't allow `0.0.0.0/0` |
 | Frontend loads but shows *Network Error* | `VITE_API_URL` on the static site or `CLIENT_URL` on the API doesn't match the real URLs (step 5). Redeploy the static site after changing `VITE_API_URL`, because it's baked in at build time |
-| First page load takes ~50 s | The free instance was asleep. Set up the UptimeRobot monitor (step 10) |
+| First page load takes ~50 s | The free instance was asleep after 15 minutes idle. Open `/api/health` once before a demo to wake it |
 | No OTP email | Check the API logs for `Mail delivery via brevo failed`. Verify the sender in Brevo and check the API key. Also look in the Spam folder |
 | Refreshing `/admin` gives 404 | The static site's rewrite rule `/* → /index.html` is missing. Re-sync the Blueprint |
