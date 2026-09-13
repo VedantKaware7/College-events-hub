@@ -20,13 +20,20 @@ const wrap = (heading, body) => `
     </div>
 `;
 
+// Tolerate values pasted into a dashboard with stray spaces, newlines or quotes
+const cleanEnv = (value) => (value || '').trim().replace(/^['"]+|['"]+$/g, '').trim();
+
 // Brevo's HTTPS API is used in production because Render's free tier blocks SMTP ports.
 const sendWithBrevo = async (options) => {
+    const apiKey = cleanEnv(process.env.BREVO_API_KEY);
+    if (apiKey.startsWith('xsmtpsib-')) {
+        throw new Error('BREVO_API_KEY is an SMTP key (xsmtpsib-…). Create an API key (xkeysib-…) under SMTP & API → API Keys.');
+    }
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
-        headers: { 'api-key': process.env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
+        headers: { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' },
         body: JSON.stringify({
-            sender: { name: APP_NAME, email: process.env.MAIL_FROM },
+            sender: { name: APP_NAME, email: cleanEnv(process.env.MAIL_FROM) },
             to: [{ email: options.to }],
             subject: options.subject,
             htmlContent: options.html
@@ -45,7 +52,7 @@ const sendWithSmtp = (options) => mailer.sendMail({
 });
 
 const deliver = async (options) => {
-    const provider = process.env.BREVO_API_KEY && process.env.MAIL_FROM
+    const provider = cleanEnv(process.env.BREVO_API_KEY) && cleanEnv(process.env.MAIL_FROM)
         ? 'brevo'
         : process.env.EMAIL_USER && process.env.EMAIL_PASS ? 'smtp' : null;
 
