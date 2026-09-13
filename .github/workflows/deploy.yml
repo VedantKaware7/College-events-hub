@@ -1,0 +1,132 @@
+name: Deploy to Render
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+jobs:
+  publish-images:
+    name: Publish images to GHCR
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+
+      - id: meta
+        run: |
+          echo "short_sha=${DEPLOY_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/college-events-hub" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          build-args: APP_VERSION=${{ steps.meta.outputs.short_sha }}
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          tags: |
+            ${{ steps.meta.outputs.image }}-server:latest
+            ${{ steps.meta.outputs.image }}-server:${{ steps.meta.outputs.short_sha }}
+
+      - name: Build & push client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          tags: |
+            ${{ steps.meta.outputs.image }}-client:latest
+            ${{ steps.meta.outputs.image }}-client:${{ steps.meta.outputs.short_sha }}
+
+  deploy:
+    name: Deploy to Render
+    needs: publish-images
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.WEB_URL }}
+    env:
+      API_HOOK: ${{ secrets.RENDER_API_DEPLOY_HOOK }}
+      WEB_HOOK: ${{ secrets.RENDER_WEB_DEPLOY_HOOK }}
+      API_URL: ${{ vars.API_URL }}
+      WEB_URL: ${{ vars.WEB_URL }}
+      SHORT_SHA: ${{ needs.publish-images.outputs.short_sha }}
+    steps:
+      - name: Check configuration
+        run: |
+          missing=0
+          for name in API_HOOK WEB_HOOK API_URL WEB_URL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured. See docs/DEPLOYMENT_RENDER.md, step 7."
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - name: Trigger API deploy (commit ${{ env.DEPLOY_SHA }})
+        run: curl -fsS -X POST "${API_HOOK}&ref=${DEPLOY_SHA}"
+
+      - name: Trigger frontend deploy
+        run: curl -fsS -X POST "${WEB_HOOK}&ref=${DEPLOY_SHA}"
+
+      - name: Wait until the API runs the new version
+        run: |
+          # Free instances cold-start and Render builds the image, so allow up to 15 minutes
+          for i in $(seq 1 60); do
+            body=$(curl -sS --max-time 60 "$API_URL/api/health" || true)
+            echo "[$i] $body"
+            if echo "$body" | grep -q "\"version\":\"$SHORT_SHA\"" && echo "$body" | grep -q '"db":"connected"'; then
+              echo "API is live on $SHORT_SHA with database connected"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::API did not report version $SHORT_SHA within 15 minutes. Check the Render deploy logs."
+          exit 1
+
+      - name: Smoke test production
+        run: |
+          curl -fsS "$API_URL/api/events/filters" | grep -q '"categories"'
+          for i in $(seq 1 40); do
+            curl -fsS "$WEB_URL" | grep -q "College-Events-hub" && break
+            sleep 15
+          done
+          curl -fsS "$WEB_URL" | grep -q "College-Events-hub"
+          echo "Frontend and API respond correctly"
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "## 🚀 Deployed \`$SHORT_SHA\`"
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Frontend | $WEB_URL |"
+            echo "| API health | $API_URL/api/health |"
+            echo "| Images | \`ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/college-events-hub-{server,client}:$SHORT_SHA\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

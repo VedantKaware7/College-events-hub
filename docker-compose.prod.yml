@@ -1,0 +1,22 @@
+# Runs the exact production images published to GitHub Container Registry by the
+# "Deploy to Render" workflow, on any Docker host (useful for demos and rollbacks).
+#
+#   GHCR_OWNER=<your-github-username-lowercase> IMAGE_TAG=<commit-sha|latest> \
+#   docker compose -f docker-compose.prod.yml --env-file server/.env up -d
+services:
+  server:
+    image: ghcr.io/${GHCR_OWNER}/college-events-hub-server:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file: server/.env
+    environment:
+      PORT: 5000
+    expose:
+      - "5000"
+
+  client:
+    image: ghcr.io/${GHCR_OWNER}/college-events-hub-client:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "8080:80"
