@@ -7,6 +7,8 @@ const Registration = require('./models/Registration');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/college_events_hub';
 const DEFAULT_PASSWORD = 'password123';
+// Production seeding (GitHub Actions) sets SEED_ADMIN_PASSWORD so the live admin account isn't guessable
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || DEFAULT_PASSWORD;
 
 const users = [
     { name: 'Admin', email: 'admin@college.edu', role: 'admin' },
@@ -128,7 +130,12 @@ const seed = async () => {
         console.log('Cleared users, events and registrations');
 
         const hashed = await bcrypt.hash(DEFAULT_PASSWORD, 10);
-        const createdUsers = await User.insertMany(users.map((u) => ({ ...u, password: hashed, isVerified: true })));
+        const adminHashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        const createdUsers = await User.insertMany(users.map((u) => ({
+            ...u,
+            password: u.role === 'admin' ? adminHashed : hashed,
+            isVerified: true
+        })));
         const admin = createdUsers.find((u) => u.role === 'admin');
         const students = createdUsers.filter((u) => u.role === 'student');
         console.log(`Created ${createdUsers.length} users`);
@@ -163,7 +170,8 @@ const seed = async () => {
         console.log('\nSeed complete');
         console.log('  Admin:   admin@college.edu');
         console.log('  Student: student@college.edu');
-        console.log(`  Password (all accounts): ${DEFAULT_PASSWORD}\n`);
+        console.log(`  Student password: ${DEFAULT_PASSWORD}`);
+        console.log(`  Admin password:   ${process.env.SEED_ADMIN_PASSWORD ? '(from SEED_ADMIN_PASSWORD)' : DEFAULT_PASSWORD}\n`);
         process.exit(0);
     } catch (error) {
         console.error('Seed failed:', error);

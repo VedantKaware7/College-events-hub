@@ -1,6 +1,6 @@
 # College-Events-hub REST API
 
-Base URL: `http://localhost:8080/api` (Docker), `http://localhost:5000/api` (Node), or `https://college-events-hub-api.onrender.com/api` (production on Render).
+Base URL: `http://localhost:8080/api` (Docker), `http://localhost:5000/api` (Node), or `https://college-events-hub-api2.onrender.com/api` (production on Render).
 
 Protected routes need the header `Authorization: Bearer <token>`. Errors return `{ "message": "..." }` with a 4xx or 5xx status.
 

@@ -47,7 +47,7 @@ flowchart LR
 
     subgraph RENDER["Render – Singapore"]
         WEB["Static Site + CDN<br/>college-events-hub.onrender.com<br/>React build"]
-        API["Web Service (Docker)<br/>college-events-hub-api.onrender.com<br/>Node.js / Express"]
+        API["Web Service (Docker)<br/>college-events-hub-api2.onrender.com<br/>Node.js / Express"]
     end
 
     subgraph ATLAS["MongoDB Atlas – AWS Singapore"]

@@ -5,7 +5,7 @@
 services:
   # ---------- REST API (Docker) ----------
   - type: web
-    name: college-events-hub-api
+    name: college-events-hub-api2
     runtime: docker
     plan: free
     region: singapore
@@ -40,7 +40,7 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: VITE_API_URL
-        value: https://college-events-hub-api.onrender.com/api   # API URL baked in at build time
+        value: https://college-events-hub-api2.onrender.com/api   # API URL baked in at build time
     routes:
       - type: rewrite
         source: /*

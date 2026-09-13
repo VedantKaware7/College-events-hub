@@ -62,7 +62,7 @@ Two ways to do this, with the same result. **Option A needs no credit card.** Re
 | Field | Value |
 |---|---|
 | Source | Git Provider → GitHub → your repository (grant Render access to the repo if asked) |
-| Name | `college-events-hub-api` |
+| Name | `college-events-hub-api2` |
 | Language | **Docker** |
 | Branch | `main` |
 | Region | **Singapore** |
@@ -101,7 +101,7 @@ Click **Deploy Static Site**. Then:
 ### Check the URLs
 
 Open each service and note its URL:
-- API: `https://college-events-hub-api.onrender.com`
+- API: `https://college-events-hub-api2.onrender.com`
 - Frontend: `https://college-events-hub.onrender.com`
 
 If a name was already taken, Render adds a suffix, e.g. `college-events-hub-x7k2.onrender.com`. In that case:
@@ -125,22 +125,23 @@ Repository → **Settings → Secrets and variables → Actions**
 
 | Name | Value |
 |---|---|
-| `RENDER_API_DEPLOY_HOOK` | deploy hook of `college-events-hub-api` |
+| `RENDER_API_DEPLOY_HOOK` | deploy hook of `college-events-hub-api2` |
 | `RENDER_WEB_DEPLOY_HOOK` | deploy hook of `college-events-hub` |
 | `MONGO_URI` | Atlas URI (used by the seed workflow) |
+| `SEED_ADMIN_PASSWORD` | strong password for the production admin account |
 
 **Variables** tab → *New repository variable*:
 
 | Name | Value |
 |---|---|
-| `API_URL` | `https://college-events-hub-api.onrender.com` (no trailing slash, no `/api`) |
+| `API_URL` | `https://college-events-hub-api2.onrender.com` (no trailing slash, no `/api`) |
 | `WEB_URL` | `https://college-events-hub.onrender.com` |
 
 ## 8. Seed demo data
 
 **Actions → Seed production database → Run workflow** → type `SEED` → Run.
 
-Demo logins: `admin@college.edu` and `student@college.edu`, password `password123`.
+Demo logins: `student@college.edu` / `password123`. The admin account `admin@college.edu` uses the `SEED_ADMIN_PASSWORD` secret (add it under Secrets before seeding).
 
 ## 9. Run the pipeline end to end
 

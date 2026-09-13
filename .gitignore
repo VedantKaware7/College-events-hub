@@ -3,5 +3,6 @@ dist
 .env
 .env.*
 !.env.example
+!client/.env.production
 *.pem
 .DS_Store

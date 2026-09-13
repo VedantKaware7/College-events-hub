@@ -29,3 +29,4 @@ jobs:
         run: npm run seed
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
