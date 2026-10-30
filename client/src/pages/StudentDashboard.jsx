@@ -5,6 +5,7 @@ import { cancelRegistration, fetchMyRegistrations } from '../api/registrations';
 import { errorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import StatCard from '../components/StatCard';
+import MfaSetup from '../components/MfaSetup';
 import { Alert, EmptyState, Spinner } from '../components/Feedback';
 import { STATUS_STYLES, formatDate, formatFee, formatTime, isPast } from '../utils/format';
 
@@ -102,6 +103,8 @@ const StudentDashboard = () => {
                     })}
                 </div>
             )}
+
+            <MfaSetup />
         </div>
     );
 };

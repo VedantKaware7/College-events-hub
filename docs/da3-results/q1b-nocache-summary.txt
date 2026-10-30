@@ -1,0 +1,7 @@
+ab -n 1000 -c 50 http://127.0.0.1:8081/api/events
+1-instance  run 1     55.68 req/s   898.027 ms mean  failed=0 non2xx=0
+1-instance  run 2     62.37 req/s   801.730 ms mean  failed=0 non2xx=0
+1-instance  run 3     62.67 req/s   797.811 ms mean  failed=0 non2xx=0
+3-instances run 1     59.09 req/s   846.196 ms mean  failed=0 non2xx=0
+3-instances run 2     63.47 req/s   787.777 ms mean  failed=0 non2xx=0
+3-instances run 3     62.27 req/s   802.946 ms mean  failed=0 non2xx=0

@@ -28,8 +28,14 @@ export const AuthProvider = ({ children }) => {
     const signIn = useCallback(async (email, password) => {
         try {
             const { data } = await apiClient.post('/auth/signin', { email, password });
+            if (data.mfaRequired) {
+                const challenge = new Error('Enter the code from your authenticator app');
+                challenge.mfaToken = data.mfaToken;
+                throw challenge;
+            }
             return saveSession(data);
         } catch (error) {
+            if (error.mfaToken) throw error;
             if (error.response?.data?.needsVerification) {
                 const pending = new Error(error.response.data.message);
                 pending.needsVerification = true;
@@ -57,6 +63,15 @@ export const AuthProvider = ({ children }) => {
         }
     }, [saveSession]);
 
+    const verifyMfa = useCallback(async (mfaToken, code) => {
+        try {
+            const { data } = await apiClient.post('/auth/mfa/verify', { mfaToken, code });
+            return saveSession(data);
+        } catch (error) {
+            throw new Error(errorMessage(error, 'Verification failed'));
+        }
+    }, [saveSession]);
+
     const signOut = useCallback(() => {
         setUser(null);
         localStorage.removeItem(SESSION_KEY);
@@ -64,8 +79,8 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const value = useMemo(
-        () => ({ user, isAdmin: user?.role === 'admin', signIn, signUp, verifyAccount, signOut }),
-        [user, signIn, signUp, verifyAccount, signOut]
+        () => ({ user, isAdmin: user?.role === 'admin', signIn, signUp, verifyAccount, verifyMfa, signOut }),
+        [user, signIn, signUp, verifyAccount, verifyMfa, signOut]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

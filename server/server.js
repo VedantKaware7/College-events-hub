@@ -10,8 +10,18 @@ if (!process.env.JWT_SECRET) {
     process.exit(1);
 }
 
-mongoose.connect(MONGO_URI)
+// MONGO_DB_NAME overrides the database in the URI
+mongoose.connect(MONGO_URI, { dbName: process.env.MONGO_DB_NAME })
     .then(() => console.log('MongoDB connected'))
     .catch((err) => console.error('MongoDB connection error:', err.message));
 
-app.listen(PORT, '0.0.0.0', () => console.log(`College-Events-hub API listening on port ${PORT}`));
+const server = app.listen(PORT, '0.0.0.0', () => console.log(`College-Events-hub API listening on port ${PORT}`));
+
+// Finish in-flight requests before exiting
+const shutdown = (signal) => {
+    console.log(`${signal} received, closing server`);
+    server.close(() => mongoose.disconnect().finally(() => process.exit(0)));
+    setTimeout(() => process.exit(0), 10000).unref();
+};
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

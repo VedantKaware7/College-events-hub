@@ -5,6 +5,7 @@ import { createEvent, deleteEvent, fetchEventFilters, fetchEvents, updateEvent }
 import { approveRegistration, cancelRegistration, fetchAdminStats, fetchAllRegistrations } from '../api/registrations';
 import { errorMessage } from '../api/client';
 import StatCard from '../components/StatCard';
+import MfaSetup from '../components/MfaSetup';
 import EventForm from '../components/EventForm';
 import { Alert, EmptyState, Spinner } from '../components/Feedback';
 import { CATEGORY_STYLES, STATUS_STYLES, formatDate, formatFee, isPast } from '../utils/format';
@@ -272,6 +273,8 @@ const AdminDashboard = () => {
                     onClose={() => setEditing(null)}
                 />
             )}
+
+            <MfaSetup />
         </div>
     );
 };

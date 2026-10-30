@@ -1,0 +1,20 @@
+== 30 x GET http://127.0.0.1:8081/api/events  (replica taken from the X-Instance response header)
+  api1   served 10 requests
+  api2   served 10 requests
+  api3   served 10 requests
+
+== GET http://127.0.0.1:8081/api/health x 3
+{"status":"ok","db":"connected","instance":"api1","uptime":45,"version":"dev"}
+{"status":"ok","db":"connected","instance":"api2","uptime":45,"version":"dev"}
+{"status":"ok","db":"connected","instance":"api3","uptime":45,"version":"dev"}
+
+== Last 9 lines of the nginx access log (upstream address + replica)
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.4:5000 instance=api1 rt=0.041
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.3:5000 instance=api2 rt=0.043
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.2:5000 instance=api3 rt=0.045
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.4:5000 instance=api1 rt=0.043
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.3:5000 instance=api2 rt=0.045
+172.67.71.182 "GET /api/events HTTP/1.1" 200 upstream=172.19.0.2:5000 instance=api3 rt=0.047
+172.67.71.182 "GET /api/health HTTP/1.1" 200 upstream=172.19.0.4:5000 instance=api1 rt=0.002
+172.67.71.182 "GET /api/health HTTP/1.1" 200 upstream=172.19.0.3:5000 instance=api2 rt=0.002
+172.67.71.182 "GET /api/health HTTP/1.1" 200 upstream=172.19.0.2:5000 instance=api3 rt=0.002
