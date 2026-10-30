@@ -1,0 +1,18 @@
+== Role-based access on PUT/DELETE /api/events/:id
+PUT    no token                                            -> HTTP 401  {"message":"Authentication required"}
+DELETE no token                                            -> HTTP 401  {"message":"Authentication required"}
+PUT    forged token (wrong signature)                      -> HTTP 401  {"message":"Session expired, please sign in again"}
+PUT    student token                                       -> HTTP 403  {"message":"Requires role: admin or faculty"}
+DELETE student token                                       -> HTTP 403  {"message":"Requires role: admin or faculty"}
+PUT    faculty token, admin's event                        -> HTTP 403  {"message":"You can only edit events you organise"}
+PUT    faculty token, own event                            -> HTTP 200  {"_id":"6ae470fce8a9c0fbf5cf38de","title":"CodeSprint 24-Hour Hackathon","description":"Fo
+PUT    admin token, any event                              -> HTTP 200  {"_id":"6ae470fce8a9c0fbf5cf38e3","title":"RoboWars Arena","description":"Build and battle
+
+== TOTP MFA enrolment + login (faculty@college.edu)
+setup  -> otpauthUrl=otpauth://totp/College-Events-hub:faculty%40college.edu?secret=<hidden>&period=30&digits=6&algorithm=SHA1&issuer=College-Events-hub  qrCode=data:image/png;base64,iVBORw0K...
+enable with wrong code 000000                              -> HTTP 400  {"message":"Invalid authenticator code"}
+enable with code from authenticator                        -> HTTP 200  {"message":"Two-factor authentication enabled","mfaEnabled":true}
+signin with password only -> {"mfaRequired":true,"mfaToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZC...
+use MFA challenge token as a session                       -> HTTP 401  {"message":"Sign-in not completed"}
+mfa/verify with wrong code                                 -> HTTP 400  {"message":"Invalid authenticator code"}
+mfa/verify with authenticator code                         -> HTTP 200  {"_id":"6ae470cce8a9c0fbf5cf38c8","name":"Prof. Meera Iyer","email":"faculty@college.edu",

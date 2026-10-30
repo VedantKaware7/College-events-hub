@@ -1,0 +1,67 @@
+== nginx config: ./nginx/lb.conf
+== ab -r -s 90 -n 5000 -c 50 http://127.0.0.1:8081/api/events   (api2 is stopped ~3s into the run)
+This is ApacheBench, Version 2.3 <$Revision: 1923142 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking 127.0.0.1 (be patient)
+Completed 500 requests
+Completed 1000 requests
+== 15:43:05 docker compose stop api2
+Completed 1500 requests
+Completed 2000 requests
+Completed 2500 requests
+Completed 3000 requests
+Completed 3500 requests
+Completed 4000 requests
+Completed 4500 requests
+Completed 5000 requests
+Finished 5000 requests
+
+
+Server Software:        nginx/1.29.8
+Server Hostname:        127.0.0.1
+Server Port:            8081
+
+Document Path:          /api/events
+Document Length:        5412 bytes
+
+Concurrency Level:      50
+Time taken for tests:   17.816 seconds
+Complete requests:      5000
+Failed requests:        0
+Total transferred:      28475000 bytes
+HTML transferred:       27060000 bytes
+Requests per second:    280.64 [#/sec] (mean)
+Time per request:       178.161 [ms] (mean)
+Time per request:       3.563 [ms] (mean, across all concurrent requests)
+Transfer rate:          1560.81 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.1      0       3
+Processing:     0  178 272.1    103    2620
+Waiting:        0  178 272.1    103    2620
+Total:          0  178 272.1    103    2620
+
+Percentage of the requests served within a certain time (ms)
+  50%    103
+  66%    196
+  75%    204
+  80%    291
+  90%    321
+  95%    498
+  98%    909
+  99%   1620
+ 100%   2620 (longest request)
+== nginx view of the run (status codes per replica)
+3891 200 upstream=172.19.0.3:5000
+1383 200 upstream=172.19.0.4:5000
+   2 200 upstream=172.19.0.4:5000,
+ 721 200 upstream=172.19.0.5:5000
+   3 200 upstream=172.19.0.5:5000,
+2026/10/30 10:13:04 [error] 21#21: *2265 recv() failed (104: Connection reset by peer) while reading response header from upstream, client: 172.67.71.182, server: , request: "GET /api/events HTTP/1.0", upstream: "http://172.19.0.5:5000/api/events", host: "127.0.0.1:8081"
+2026/10/30 10:13:04 [warn] 21#21: *2265 upstream server temporarily disabled while reading response header from upstream, client: 172.67.71.182, server: , request: "GET /api/events HTTP/1.0", upstream: "http://172.19.0.5:5000/api/events", host: "127.0.0.1:8081"
+2026/10/30 10:13:04 [error] 24#24: *2357 recv() failed (104: Connection reset by peer) while reading response header from upstream, client: 172.67.71.182, server: , request: "GET /api/events HTTP/1.0", upstream: "http://172.19.0.5:5000/api/events", host: "127.0.0.1:8081"
+2026/10/30 10:13:04 [warn] 24#24: *2357 upstream server temporarily disabled while reading response header from upstream, client: 172.67.71.182, server: , request: "GET /api/events HTTP/1.0", upstream: "http://172.19.0.5:5000/api/events", host: "127.0.0.1:8081"
+2026/10/30 10:13:08 [error] 25#25: *3554 recv() failed (104: Connection reset by peer) while reading response header from upstream, client: 172.67.71.182, server: , request: "GET /api/events HTTP/1.0", upstream: "http://172.19.0.4:5000/api/events", host: "127.0.0.1:8081"

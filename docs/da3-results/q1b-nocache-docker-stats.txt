@@ -1,0 +1,5 @@
+NAME               CPU %     MEM USAGE / LIMIT
+vk-devops-api1-1   11.61%    61.41MiB / 9.704GiB
+vk-devops-api2-1   7.18%     68.64MiB / 9.704GiB
+vk-devops-api3-1   8.00%     78.23MiB / 9.704GiB
+ceh-lb             1.82%     9.262MiB / 9.704GiB

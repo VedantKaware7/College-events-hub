@@ -6,13 +6,14 @@ import OtpInput from '../components/OtpInput';
 import { Alert } from '../components/Feedback';
 
 const Login = () => {
-    const { signIn, verifyAccount } = useAuth();
+    const { signIn, verifyAccount, verifyMfa } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
     const [form, setForm] = useState({ email: '', password: '' });
     const [otp, setOtp] = useState('');
     const [needsOtp, setNeedsOtp] = useState(false);
+    const [mfaToken, setMfaToken] = useState('');
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const [busy, setBusy] = useState(false);
@@ -27,10 +28,17 @@ const Login = () => {
         setBusy(true);
         setError('');
         try {
-            const session = needsOtp ? await verifyAccount(form.email, otp) : await signIn(form.email, form.password);
+            let session;
+            if (mfaToken) session = await verifyMfa(mfaToken, otp);
+            else if (needsOtp) session = await verifyAccount(form.email, otp);
+            else session = await signIn(form.email, form.password);
             goHome(session);
         } catch (err) {
-            if (err.needsVerification) {
+            if (err.mfaToken) {
+                setMfaToken(err.mfaToken);
+                setOtp('');
+                setNotice('Open Google or Microsoft Authenticator and enter the 6-digit code.');
+            } else if (err.needsVerification) {
                 setNeedsOtp(true);
                 setNotice('Your account is not verified yet. We emailed you a new code.');
             } else {
@@ -42,12 +50,17 @@ const Login = () => {
     };
 
     return (
-        <AuthLayout title={needsOtp ? 'Verify your account' : 'Welcome back'} subtitle={needsOtp ? form.email : 'Sign in to College-Events-hub'}>
+        <AuthLayout
+            title={mfaToken ? 'Two-factor authentication' : needsOtp ? 'Verify your account' : 'Welcome back'}
+            subtitle={mfaToken || needsOtp ? form.email : 'Sign in to College-Events-hub'}
+        >
             <form onSubmit={handleSubmit} className="card space-y-5 p-6 md:p-8">
                 <Alert>{error}</Alert>
                 <Alert tone="info">{notice}</Alert>
 
-                {needsOtp ? (
+                {mfaToken ? (
+                    <OtpInput value={otp} onChange={setOtp} label="Authenticator code" />
+                ) : needsOtp ? (
                     <OtpInput value={otp} onChange={setOtp} />
                 ) : (
                     <>
@@ -65,7 +78,7 @@ const Login = () => {
                 )}
 
                 <button type="submit" disabled={busy} className="btn-primary w-full py-3">
-                    {busy ? 'Please wait…' : needsOtp ? 'Verify & sign in' : 'Sign in'}
+                    {busy ? 'Please wait…' : mfaToken || needsOtp ? 'Verify & sign in' : 'Sign in'}
                 </button>
             </form>
 

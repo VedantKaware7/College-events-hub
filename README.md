@@ -60,12 +60,13 @@ flowchart LR
 | [postman/](postman/College-Events-hub.postman_collection.json) | Postman collection for every endpoint |
 | [render.yaml](render.yaml) | Infrastructure as Code (Render Blueprint) |
 
+
 ## Run locally
 
 **Docker (recommended):**
 ```bash
 docker compose up --build -d
-docker compose exec server npm run seed
+docker compose exec server node seed.js  
 # open http://localhost:8080
 ```
 
@@ -78,6 +79,13 @@ npm run dev                          # API :5000, React :5173
 ```
 
 Without email credentials in `.env`, OTP codes are printed in the server logs.
+
+**Scaled stack (DA3): 3 API replicas behind an Nginx load balancer, on MongoDB Atlas:**
+```bash
+docker compose -f docker-compose.lb.yml up --build -d
+docker compose -f docker-compose.lb.yml run --rm --no-deps api1 node seed.js   
+```
+See [docs/ASSIGNMENT3.md](docs/ASSIGNMENT3.md).
 
 ## Project structure
 

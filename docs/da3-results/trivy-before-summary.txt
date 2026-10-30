@@ -1,0 +1,37 @@
+ceh-server:da1 (alpine 3.23.4): CRITICAL=0 HIGH=4
+  HIGH     CVE-2026-14456       libcrypto3@3.5.6-r0 -> 3.5.8-r0
+  HIGH     CVE-2026-45447       libcrypto3@3.5.6-r0 -> 3.5.7-r0
+  HIGH     CVE-2026-14456       libssl3@3.5.6-r0 -> 3.5.8-r0
+  HIGH     CVE-2026-45447       libssl3@3.5.6-r0 -> 3.5.7-r0
+Node.js: CRITICAL=2 HIGH=28
+  HIGH     CVE-2026-111181      body-parser@1.20.4 -> 2.4.0, 1.20.9
+  HIGH     CVE-2026-102276      brace-expansion@2.0.1 -> 5.0.10, 3.0.7, 2.1.5, 1.1.19
+  HIGH     CVE-2026-102278      brace-expansion@2.0.1 -> 5.0.11, 3.0.8, 2.1.6, 1.1.20
+  HIGH     CVE-2026-13149       brace-expansion@2.0.1 -> 5.0.7, 1.1.16, 2.1.2
+  HIGH     CVE-2026-14257       brace-expansion@2.0.1 -> 5.0.8, 3.0.3, 2.1.3, 1.1.17
+  HIGH     CVE-2026-69152       brace-expansion@2.0.1 -> 1.1.18, 2.1.4, 3.0.6, 5.0.9
+  HIGH     CVE-2024-21538       cross-spawn@7.0.3 -> 7.0.5, 6.0.6
+  HIGH     CVE-2025-64756       glob@10.4.2 -> 11.1.0, 10.5.0
+  HIGH     CVE-2026-69192       ip-address@9.0.5 -> 10.3.1
+  HIGH     CVE-2026-26996       minimatch@9.0.5 -> 10.2.1, 9.0.6, 8.0.5, 7.4.7, 6.2.1, 5.1.7, 4.2.4, 3.1.3
+  HIGH     CVE-2026-27903       minimatch@9.0.5 -> 10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.3
+  HIGH     CVE-2026-27904       minimatch@9.0.5 -> 10.2.3, 9.0.7, 8.0.6, 7.4.8, 6.2.2, 5.1.8, 4.2.5, 3.1.4
+  HIGH     CVE-2025-14874       nodemailer@6.10.1 -> 7.0.11
+  HIGH     CVE-2026-82659       nodemailer@6.10.1 -> 9.0.1
+  HIGH     CVE-2026-82662       nodemailer@6.10.1 -> 8.0.8
+  HIGH     GHSA-2x7j-588g-ccc2  nodemailer@6.10.1 -> 9.1.0
+  HIGH     GHSA-v53p-9fqp-m79j  nodemailer@6.10.1 -> 10.0.6
+  HIGH     CVE-2026-9496        pacote@18.0.6 -> 21.5.1
+  HIGH     CVE-2026-4867        path-to-regexp@0.1.12 -> 0.1.13
+  CRITICAL CVE-2026-90711       proxy-addr@2.0.7 -> 2.0.8
+  HIGH     CVE-2026-48815       sigstore@2.3.1 -> 4.1.1
+  CRITICAL CVE-2026-59873       tar@6.2.1 -> 7.5.19
+  HIGH     CVE-2026-23745       tar@6.2.1 -> 7.5.3
+  HIGH     CVE-2026-23950       tar@6.2.1 -> 7.5.4
+  HIGH     CVE-2026-24842       tar@6.2.1 -> 7.5.7
+  HIGH     CVE-2026-26960       tar@6.2.1 -> 7.5.8
+  HIGH     CVE-2026-29786       tar@6.2.1 -> 7.5.10
+  HIGH     CVE-2026-31802       tar@6.2.1 -> 7.5.11
+  HIGH     CVE-2026-59874       tar@6.2.1 -> 7.5.18
+  HIGH     CVE-2026-73566       tar@6.2.1 -> 7.5.21
+TOTAL (ceh-server:da1): CRITICAL=2 HIGH=32

@@ -1,6 +1,5 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Event = require('./models/Event');
 const Registration = require('./models/Registration');
@@ -12,6 +11,7 @@ const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || DEFAULT_PASSWORD;
 
 const users = [
     { name: 'Admin', email: 'admin@college.edu', role: 'admin' },
+    { name: 'Prof. Meera Iyer', email: 'faculty@college.edu', role: 'faculty' },
     { name: 'Demo Student', email: 'student@college.edu', role: 'student' },
     { name: 'Aarav Patil', email: 'aarav@college.edu', role: 'student' },
     { name: 'Sneha Deshmukh', email: 'sneha@college.edu', role: 'student' },
@@ -123,24 +123,24 @@ const events = [
 
 const seed = async () => {
     try {
-        await mongoose.connect(MONGO_URI);
-        console.log('Connected to MongoDB');
+        await mongoose.connect(MONGO_URI, { dbName: process.env.MONGO_DB_NAME });
+        console.log(`Connected to MongoDB (database: ${mongoose.connection.name})`);
 
         await Promise.all([User.deleteMany(), Event.deleteMany(), Registration.deleteMany()]);
         console.log('Cleared users, events and registrations');
 
-        const hashed = await bcrypt.hash(DEFAULT_PASSWORD, 10);
-        const adminHashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
-        const createdUsers = await User.insertMany(users.map((u) => ({
+        // create() runs the bcrypt hook, so each user gets its own salt
+        const createdUsers = await User.create(users.map((u) => ({
             ...u,
-            password: u.role === 'admin' ? adminHashed : hashed,
+            password: u.role === 'admin' ? ADMIN_PASSWORD : DEFAULT_PASSWORD,
             isVerified: true
         })));
         const admin = createdUsers.find((u) => u.role === 'admin');
+        const faculty = createdUsers.find((u) => u.role === 'faculty');
         const students = createdUsers.filter((u) => u.role === 'student');
         console.log(`Created ${createdUsers.length} users`);
 
-        const createdEvents = await Event.insertMany(events.map((e) => ({ ...e, seatsLeft: e.capacity, organizer: admin._id })));
+        const createdEvents = await Event.insertMany(events.map((e, i) => ({ ...e, seatsLeft: e.capacity, organizer: i < 2 ? faculty._id : admin._id })));
         console.log(`Created ${createdEvents.length} events`);
 
         const registrations = [];
@@ -169,6 +169,7 @@ const seed = async () => {
 
         console.log('\nSeed complete');
         console.log('  Admin:   admin@college.edu');
+        console.log('  Faculty: faculty@college.edu (organises the first 2 events)');
         console.log('  Student: student@college.edu');
         console.log(`  Student password: ${DEFAULT_PASSWORD}`);
         console.log(`  Admin password:   ${process.env.SEED_ADMIN_PASSWORD ? '(from SEED_ADMIN_PASSWORD)' : DEFAULT_PASSWORD}\n`);
